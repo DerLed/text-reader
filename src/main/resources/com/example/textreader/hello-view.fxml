@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.example.textreader.TextReaderController">
+    <top>
+        <MenuBar>
+            <Menu text="File">
+                <MenuItem text="Open" onAction="#chooseFile"/>
+                <MenuItem text="Save" onAction="#saveFile"/>
+                <MenuItem text="Save as" onAction="#saveAsFile"/>
+                <MenuItem text="Close" onAction="#onClose"/>
+            </Menu>
+        </MenuBar>
+    </top>
+    <center>
+        <AnchorPane>
+            <TextArea fx:id="textArea" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
+
+        </AnchorPane>
+    </center>
+
+</BorderPane>
+
+
+
