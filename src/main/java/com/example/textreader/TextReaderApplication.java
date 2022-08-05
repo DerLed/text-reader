@@ -9,7 +9,7 @@ import java.io.IOException;
 
 public class TextReaderApplication extends Application {
 
-    private static Stage primaryStage; // **Declare static Stage**
+    private static Stage primaryStage;
 
     private void setPrimaryStage(Stage stage) {
         primaryStage = stage;
