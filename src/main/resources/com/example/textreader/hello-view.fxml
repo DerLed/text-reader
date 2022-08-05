@@ -9,10 +9,10 @@
     <top>
         <MenuBar>
             <Menu text="File">
-                <MenuItem text="Open" onAction="#chooseFile"/>
-                <MenuItem text="Save" onAction="#saveFile"/>
-                <MenuItem text="Save as" onAction="#saveAsFile"/>
-                <MenuItem text="Close" onAction="#onClose"/>
+                <MenuItem text="Открыть" onAction="#chooseFile"/>
+                <MenuItem text="Сохранить" onAction="#saveFile"/>
+                <MenuItem text="Сохранить как..." onAction="#saveAsFile"/>
+                <MenuItem text="Выход" onAction="#onClose"/>
             </Menu>
         </MenuBar>
     </top>

@@ -1,57 +1,57 @@
 package com.example.textreader;
 
-import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
+import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.TextArea;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.charset.MalformedInputException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static java.util.logging.Level.SEVERE;
-import java.util.logging.Logger;
 
 public class TextReaderController {
 
     private File loadedFileReference;
 
-    private TextReaderService textReaderService;
-
     @FXML
     public TextArea textArea;
 
     @FXML
-    public void chooseFile() {
-
+    public void chooseFile(ActionEvent ae) {
         File fileToLoad = getFileChooser().showOpenDialog(null);
-        if(fileToLoad != null){
+        if (fileToLoad != null) {
             loadFileToTextArea(fileToLoad);
+            this.loadedFileReference = fileToLoad;
+            TextReaderApplication.getPrimaryStage().setTitle(loadedFileReference.getName());
         }
     }
 
     @FXML
     public void saveFile() {
-        try {
-            FileWriter myWriter = new FileWriter(loadedFileReference);
-            myWriter.write(textArea.getText());
-            myWriter.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (loadedFileReference == null) {
+            saveAsFile();
+        } else {
+            saveStringToFile(textArea.getText(), loadedFileReference);
         }
+
     }
 
-    public void saveAsFile(ActionEvent actionEvent) {
+    @FXML
+    public void saveAsFile() {
 
         File file = getFileChooser().showSaveDialog(null);
 
         if (file != null) {
-            saveTextToFile(textArea.getText(), file);
+            loadedFileReference = file;
+            saveStringToFile(textArea.getText(), file);
+            TextReaderApplication.getPrimaryStage().setTitle(loadedFileReference.getName());
         }
     }
 
@@ -61,55 +61,28 @@ public class TextReaderController {
     }
 
     private void loadFileToTextArea(File fileToLoad) {
-        Task<TextFile> loadTask = fileLoaderTask(fileToLoad);
-        loadTask.run();
-    }
-
-    private Task<TextFile> fileLoaderTask(File fileToLoad){
-
-        Task<TextFile> loadFileTask = new Task<>() {
-            @Override
-            protected TextFile call() throws Exception {
-                List<String> ls;
-                try (Stream<String> stream = Files.lines(fileToLoad.toPath())){
-                    ls = stream.collect(Collectors.toList());
-                }
-
-                return new TextFile(fileToLoad.getPath(), ls);
-            }
-        };
-
-
-        loadFileTask.setOnSucceeded(workerStateEvent -> {
-            try {
-                textArea.setText(String.join("", loadFileTask.get().getContent()));
-                textReaderService.setTextFile(loadFileTask.get());
-            } catch (InterruptedException | ExecutionException e) {
-                textArea.setText("Невозможно открыть файл:\n " + textReaderService.getTextFile().getPath());
-            }
-        });
-
-        loadFileTask.setOnFailed(workerStateEvent -> {
-            textArea.setText("Невозможно открыть файл:\n " + textReaderService.getTextFile().getPath());
-
-        });
-        return loadFileTask;
-    }
-
-
-
-    private void saveTextToFile(String content, File file) {
         try {
-            PrintWriter writer;
-            writer = new PrintWriter(file);
-            writer.println(content);
-            writer.close();
-        } catch (IOException ex) {
-            ex.printStackTrace();
+            Stream<String> lines = Files.lines(fileToLoad.toPath(), StandardCharsets.UTF_8);
+            textArea.setText(lines.collect(Collectors.joining("\n")));
+            lines.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+
     }
 
-    private FileChooser getFileChooser(){
+    private void saveStringToFile(String content, File file) {
+        try (BufferedReader reader = new BufferedReader(new StringReader(content));
+             PrintWriter writer = new PrintWriter(new FileWriter(file, StandardCharsets.UTF_8))
+        ) {
+            reader.lines().forEach(writer::println);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    private FileChooser getFileChooser() {
         FileChooser fileChooser = new FileChooser();
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.txt)", "*.txt");
         fileChooser.getExtensionFilters().add(extFilter);
